@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>铁人消防员工培训学分查询平台</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        :root {
+            --primary: #4361ee;
+            --secondary: #3f37c9;
+            --dark: #1e1e2c;
+            --light: #f8f9fa;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --card-bg: rgba(255, 255, 255, 0.95);
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 0 30px;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            animation: fadeIn 1s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo {
+            background-color: var(--primary);
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.5);
+        }
+        
+        header p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.6;
+            color: rgba(255,255,255,0.85);
+        }
+        
+        .search-section {
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            margin: 30px 0;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .search-container {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .search-title {
+            text-align: center;
+            color: var(--dark);
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .search-subtitle {
+            text-align: center;
+            color: #777;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+        
+        .input-container {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+        }
+        
+        #search-input {
+            flex: 1;
+            padding: 18px 25px;
+            border: 2px solid #e0e0e0;
+            border-radius: 50px;
+            font-size: 1.15rem;
+            outline: none;
+            transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+        
+        #search-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(67, 97, 238, 0.2);
+        }
+        
+        #search-button {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 0 45px;
+            font-size: 1.15rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.4);
+        }
+        
+        #search-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.6);
+        }
+        
+        #search-button:active {
+            transform: translateY(0);
+        }
+        
+        .suggestions {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 10px;
+            display: none;
+            border: 1px solid #eee;
+        }
+        
+        .suggestion-item {
+            padding: 15px 25px;
+            border-bottom: 1px solid #f5f5f5;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .suggestion-item:hover {
+            background: #f9f9f9;
+        }
+        
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+        
+        .suggestion-department {
+            background: #e1f0fa;
+            color: #3498db;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .result-section {
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            margin-top: 40px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .employee-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            padding: 40px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .employee-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 10px;
+            height: 100%;
+            background: var(--primary);
+        }
+        
+        .employee-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px dashed #eee;
+        }
+        
+        .employee-name {
+            font-size: 2.4rem;
+            color: var(--dark);
+            font-weight: 700;
+        }
+        
+        .employee-department {
+            background: var(--secondary);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 30px;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        .credit-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .credit-card {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #f0f0f0;
+        }
+        
+        .credit-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .credit-card h3 {
+            color: var(--dark);
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+        }
+        
+        .credit-value {
+            font-size: 2.8rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        
+        .chart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+            margin-top: 30px;
+            border: 1px solid #f0f0f0;
+        }
+        
+        .chart-title {
+            text-align: center;
+            margin-bottom: 25px;
+            color: var(--dark);
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .chart {
+            height: 350px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            gap: 15px;
+            padding: 30px 0;
+        }
+        
+        .bar-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+        
+        .bar-label {
+            margin-top: 15px;
+            font-size: 1rem;
+            color: #666;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .bar {
+            width: 80%;
+            background: var(--primary);
+            border-radius: 10px 10px 0 0;
+            transition: height 1s ease;
+            position: relative;
+            min-height: 5px;
+        }
+        
+        .bar-value {
+            position: absolute;
+            top: -40px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-weight: bold;
+            color: var(--dark);
+            font-size: 1.1rem;
+        }
+        
+        .no-result {
+            text-align: center;
+            padding: 60px;
+            color: #666;
+        }
+        
+        .no-result i {
+            font-size: 5rem;
+            color: #e0e0e0;
+            margin-bottom: 25px;
+        }
+        
+        .no-result h2 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+        
+        .no-result p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .statistics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 40px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+            text-align: center;
+            border: 1px solid #f0f0f0;
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card h3 {
+            color: var(--dark);
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 20px 0;
+        }
+        
+        .stat-description {
+            color: #666;
+            font-size: 1.1rem;
+        }
+        
+        footer {
+            text-align: center;
+            color: white;
+            padding: 40px 0 20px;
+            margin-top: 40px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            font-size: 1.1rem;
+        }
+        
+        @media (max-width: 768px) {
+            .input-container {
+                flex-direction: column;
+            }
+            
+            #search-button {
+                padding: 18px;
+                justify-content: center;
+            }
+            
+            .search-section, .result-section {
+                padding: 25px;
+            }
+            
+            .employee-card {
+                padding: 25px;
+            }
+            
+            .employee-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+            
+            header h1 {
+                font-size: 2.2rem;
+            }
+            
+            .credit-summary {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                <div class="logo">
+                    <i class="fas fa-fire-extinguisher fa-2x"></i>
+                </div>
+                铁人消防员工培训学分查询平台
+            </h1>
+            <p>输入员工姓名，查询2024-2025年培训学分详情。数据更新至2025年6月30日。</p>
+        </header>
+        
+        <section class="search-section">
+            <div class="search-container">
+                <div>
+                    <h2 class="search-title">学分查询</h2>
+                    <p class="search-subtitle">请输入员工姓名查询培训学分详情</p>
+                </div>
+                <div class="input-container">
+                    <input type="text" id="search-input" placeholder="输入员工姓名..." autocomplete="off">
+                    <button id="search-button">
+                        <i class="fas fa-search"></i> 查询学分
+                    </button>
+                </div>
+                <div class="suggestions" id="suggestions"></div>
+            </div>
+        </section>
+        
+        <section class="result-section" id="result-section">
+            <div class="employee-card" id="employee-result">
+                <div class="no-result">
+                    <i class="fas fa-search fa-4x"></i>
+                    <h2>欢迎使用学分查询系统</h2>
+                    <p>请输入员工姓名查询培训学分详情，系统将展示完整的学分记录和统计信息</p>
+                </div>
+            </div>
+            
+            <div class="statistics">
+                <div class="stat-card">
+                    <h3><i class="fas fa-users"></i> 部门平均学分</h3>
+                    <div class="stat-value" id="dept-average">--</div>
+                    <div class="stat-description">所在部门的平均学分</div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3><i class="fas fa-trophy"></i> 公司排名</h3>
+                    <div class="stat-value" id="company-rank">--</div>
+                    <div class="stat-description">在所有员工中的学分排名</div>
+                </div>
+                
+                <div class="stat-card">
+                    <h3><i class="fas fa-star"></i> 达标状态</h3>
+                    <div class="stat-value" id="compliance-status">--</div>
+                    <div class="stat-description">年度学分要求: 30分</div>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <footer>
+        <p>铁人消防安全培训中心 &copy; 2025 | 数据截止至2025年6月30日</p>
+    </footer>
+    
+    <script>
+        // 员工数据
+        const employees = [
+            { id: 1, department: "EPC技术部", name: "韦润施", offline24: 77, online24: 11, offline25: 24, online25: 1 },
+            { id: 2, department: "EPC技术部", name: "孙泰宇", offline24: 59, online24: 2, offline25: 22, online25: 0 },
+            { id: 3, department: "EPC技术部", name: "张治政", offline24: 38, online24: 0, offline25: 29, online25: 0 },
+            { id: 4, department: "EPC技术部", name: "郁维康", offline24: 34, online24: 1, offline25: 25, online25: 0 },
+            { id: 5, department: "EPC技术部", name: "张剑超", offline24: 31, online24: 0, offline25: 28, online25: 0 },
+            { id: 6, department: "EPC技术部", name: "高晗", offline24: 0, online24: 0, offline25: 36, online25: 2 },
+            { id: 7, department: "EPC技术部", name: "夏家政", offline24: 0, online24: 0, offline25: 25, online25: 0 },
+            { id: 8, department: "EPC技术部", name: "庄丽萍", offline24: 18, online24: 0, offline25: 6, online25: 0 },
+            { id: 9, department: "财务部", name: "李超文", offline24: 2, online24: 0, offline25: 4, online25: 0 },
+            { id: 10, department: "财务部", name: "乔春华", offline24: 2, online24: 0, offline25: 4, online25: 0 },
+            { id: 11, department: "财务部", name: "舒君蓉", offline24: 2, online24: 0, offline25: 4, online25: 0 },
+            { id: 12, department: "财务部", name: "王佳伟", offline24: 2, online24: 0, offline25: 4, online25: 0 },
+            { id: 13, department: "财务部", name: "胡付贝妮", offline24: 0, online24: 0, offline25: 4, online25: 0 },
+            { id: 14, department: "供应链", name: "田丽", offline24: 33, online24: 0, offline25: 18, online25: 14 },
+            { id: 15, department: "供应链", name: "付卫允", offline24: 36, online24: 1, offline25: 13, online25: 14 },
+            { id: 16, department: "供应链", name: "计敏芝", offline24: 38, online24: 1, offline25: 10, online25: 3 },
+            { id: 17, department: "供应链", name: "唐德清", offline24: 19, online24: 0, offline25: 12, online25: 3 },
+            { id: 18, department: "供应链", name: "瞿蓓珍", offline24: 8, online24: 0, offline25: 10, online25: 8 },
+            { id: 19, department: "供应链", name: "张本韦", offline24: 0, online24: 0, offline25: 9, online25: 0 },
+            { id: 20, department: "供应链", name: "张芹", offline24: 0, online24: 0, offline25: 4, online25: 3 },
+            { id: 21, department: "供应链", name: "潘涛", offline24: 0, online24: 0, offline25: 6, online25: 0 },
+            { id: 22, department: "供应链", name: "马俊", offline24: 0, online24: 0, offline25: 6, online25: 0 },
+            { id: 23, department: "供应链", name: "陆家文", offline24: 0, online24: 0, offline25: 4, online25: 0 },
+            { id: 24, department: "供应链", name: "张笑语", offline24: 0, online24: 0, offline25: 4, online25: 0 },
+            { id: 25, department: "供应链", name: "赵敏琦", offline24: 0, online24: 0, offline25: 0, online25: 0 },
+            { id: 26, department: "储能技术部", name: "寇琪", offline24: 123, online24: 12, offline25: 39, online25: 0 },
+            { id: 27, department: "储能技术部", name: "赵文琪", offline24: 112, online24: 12, offline25: 29, online25: 1 },
+            { id: 28, department: "储能技术部", name: "郭明宇", offline24: 103, online24: 11, offline25: 32, online25: 1 },
+            { id: 29, department: "储能技术部", name: "户世瑶", offline24: 89, online24: 16, offline25: 38, online25: 0 },
+            { id: 30, department: "储能技术部", name: "刘利欣", offline24: 92, online24: 13, offline25: 37, online25: 0 },
+            { id: 31, department: "储能技术部", name: "韩彦慧", offline24: 86, online24: 15, offline25: 36, online25: 0 },
+            { id: 32, department: "储能技术部", name: "丁皓辰", offline24: 64, online24: 13, offline25: 35, online25: 0 },
+            { id: 33, department: "储能技术部", name: "龚一雕", offline24: 66, online24: 12, offline25: 27, online25: 0 },
+            { id: 34, department: "储能技术部", name: "崔思佳", offline24: 39, online24: 13, offline25: 35, online25: 0 },
+            { id: 35, department: "储能技术部", name: "韩保润", offline24: 35, online24: 12, offline25: 33, online25: 0 },
+            { id: 36, department: "储能技术部", name: "刘时财", offline24: 39, online24: 10, offline25: 29, online25: 1 },
+            { id: 37, department: "储能技术部", name: "徐光晶", offline24: 40, online24: 11, offline25: 25, online25: 1 },
+            { id: 38, department: "储能技术部", name: "李洁", offline24: 52, online24: 12, offline25: 13, online25: 0 },
+            { id: 39, department: "储能技术部", name: "孙毅凯", offline24: 35, online24: 5, offline25: 32, online25: 0 },
+            { id: 40, department: "储能技术部", name: "陆敬频", offline24: 21, online24: 11, offline25: 38, online25: 0 },
+            { id: 41, department: "储能技术部", name: "马杰", offline24: 19, online24: 10, offline25: 14, online25: 3 },
+            { id: 42, department: "储能技术部", name: "汪梦月", offline24: 0, online24: 0, offline25: 41, online25: 0 },
+            { id: 43, department: "储能技术部", name: "张艳忠", offline24: 0, online24: 0, offline25: 4, online25: 27 },
+            { id: 44, department: "储能技术部", name: "吴培诚", offline24: 25, online24: 0, offline25: 5, online25: 0 },
+            { id: 45, department: "储能技术部", name: "郭帅成", offline24: 0, online24: 0, offline25: 6, online25: 1 },
+            { id: 46, department: "储能技术部", name: "李宁", offline24: 0, online24: 0, offline25: 6, online25: 1 },
+            { id: 47, department: "储能技术部", name: "汤建华", offline24: 0, online24: 0, offline25: 2, online25: 3 },
+            { id: 48, department: "储能技术部", name: "李龙飞", offline24: 0, online24: 0, offline25: 0, online25: 0 },
+            { id: 49, department: "储能技术部", name: "力炎斌", offline24: 0, online24: 0, offline25: 0, online25: 0 },
+            { id: 50, department: "工艺组", name: "张亚伟", offline24: 0, online24: 0, offline25: 20, online25: 1 },
+            { id: 51, department: "客服部", name: "陈瑶", offline24: 16, online24: 0, offline25: 7, online25: 0 },
+            { id: 52, department: "客服部", name: "何霜霜", offline24: 14, online24: 0, offline25: 7, online25: 0 },
+            { id: 53, department: "生产部", name: "卢正魁", offline24: 2, online24: 0, offline25: 13, online25: 0 },
+            { id: 54, department: "生产部", name: "王黎华", offline24: 2, online24: 0, offline25: 8, online25: 0 },
+            { id: 55, department: "生产部", name: "张翀", offline24: 0, online24: 0, offline25: 6, online25: 0 },
+            { id: 56, department: "外贸部", name: "葛兰萍", offline24: 0, online24: 0, offline25: 4, online25: 0 },
+            { id: 57, department: "外贸部", name: "倪妮", offline24: 0, online24: 0, offline25: 4, online25: 0 },
+            { id: 58, department: "外贸部", name: "张晶晶", offline24: 0, online24: 0, offline25: 4, online25: 0 },
+            { id: 59, department: "现场项目部", name: "张红强", offline24: 0, online24: 0, offline25: 0, online25: 22 },
+            { id: 60, department: "现场项目部", name: "姚成林", offline24: 0, online24: 0, offline25: 5, online25: 0 },
+            { id: 61, department: "现场项目部", name: "赵健", offline24: 0, online24: 0, offline25: 3, online25: 0 },
+            { id: 62, department: "现场项目部", name: "黄义松", offline24: 0, online24: 0, offline25: 3, online25: 0 },
+            { id: 63, department: "现场项目部", name: "赵波", offline24: 0, online24: 0, offline25: 3, online25: 0 },
+            { id: 64, department: "现场项目部", name: "徐秋锋", offline24: 0, online24: 0, offline25: 3, online25: 0 },
+            { id: 65, department: "现场项目部", name: "王云", offline24: 0, online24: 0, offline25: 3, online25: 0 },
+            { id: 66, department: "现场项目部", name: "易卫", offline24: 0, online24: 0, offline25: 3, online25: 0 },
+            { id: 67, department: "现场项目部", name: "帅笑警", offline24: 0, online24: 0, offline25: 3, online25: 0 },
+            { id: 68, department: "现场项目部", name: "刘强", offline24: 0, online24: 0, offline25: 2, online25: 0 },
+            { id: 69, department: "项目部", name: "叶献春", offline24: 18, online24: 0, offline25: 6, online25: 0 },
+            { id: 70, department: "项目部", name: "邹楠", offline24: 0, online24: 0, offline25: 6, online25: 0 },
+            { id: 71, department: "项目部", name: "王红石", offline24: 0, online24: 0, offline25: 0, online25: 0 },
+            { id: 72, department: "新媒体部", name: "陈文豪", offline24: 0, online24: 0, offline25: 4, online25: 0 },
+            { id: 73, department: "行政人事部", name: "李圣乐", offline24: 60, online24: 17, offline25: 71, online25: 4 },
+            { id: 74, department: "行政人事部", name: "陈铃琳", offline24: 8, online24: 0, offline25: 11, online25: 0 },
+            { id: 75, department: "行政人事部", name: "胡耀云", offline24: 8, online24: 0, offline25: 8, online25: 0 },
+            { id: 76, department: "行政人事部", name: "张娟", offline24: 11, online24: 0, offline25: 4, online25: 0 },
+            { id: 77, department: "行政人事部", name: "于俊杰", offline24: 0, online24: 0, offline25: 0, online25: 0 },
+            { id: 78, department: "研发部", name: "孙丝", offline24: 29, online24: 11, offline25: 6, online25: 2 },
+            { id: 79, department: "研发部", name: "贺攀登", offline24: 23, online24: 9, offline25: 9, online25: 3 },
+            { id: 80, department: "研发部", name: "喻婷", offline24: 16, online24: 10, offline25: 12, online25: 1 },
+            { id: 81, department: "研发部", name: "吴晓毅", offline24: 24, online24: 0, offline25: 6, online25: 0 },
+            { id: 82, department: "研发部", name: "戴顺杰", offline24: 7, online24: 0, offline25: 7, online25: 0 },
+            { id: 83, department: "研发部", name: "赵顺祥", offline24: 0, online24: 0, offline25: 4, online25: 0 },
+            { id: 84, department: "研发部", name: "肖煜", offline24: 0, online24: 0, offline25: 0, online25: 0 },
+            { id: 85, department: "验证调试组", name: "彭邦理", offline24: 22, online24: 0, offline25: 16, online25: 0 },
+            { id: 86, department: "验证调试组", name: "邱豪", offline24: 24, online24: 0, offline25: 13, online25: 0 },
+            { id: 87, department: "验证调试组", name: "孙昊", offline24: 0, online24: 0, offline25: 6, online25: 0 },
+            { id: 88, department: "验证调试组", name: "张俊杰", offline24: 0, online24: 0, offline25: 4, online25: 1 },
+            { id: 89, department: "营销部", name: "张卫超", offline24: 18, online24: 0, offline25: 3, online25: 0 },
+            { id: 90, department: "营销部", name: "翁叶敏", offline24: 18, online24: 0, offline25: 3, online25: 0 },
+            { id: 91, department: "营销部", name: "端木文正", offline24: 12, online24: 0, offline25: 0, online25: 8 },
+            { id: 92, department: "营销部", name: "付霄剑", offline24: 16, online24: 0, offline25: 0, online25: 0 },
+            { id: 93, department: "营销部", name: "王美红", offline24: 14, online24: 0, offline25: 0, online25: 0 },
+            { id: 94, department: "营销部", name: "王俊", offline24: 0, online24: 0, offline25: 4, online25: 0 },
+            { id: 95, department: "营销部", name: "彭洪超", offline24: 0, online24: 0, offline25: 0, online25: 3 },
+            { id: 96, department: "营销部", name: "李笑菲", offline24: 0, online24: 0, offline25: 0, online25: 0 },
+            { id: 97, department: "质量管理部", name: "徐宇轩", offline24: 61, online24: 11, offline25: 23, online25: 3 },
+            { id: 98, department: "质量管理部", name: "陈志宇", offline24: 26, online24: 33, offline25: 20, online25: 37 },
+            { id: 99, department: "质量管理部", name: "潘腾", offline24: 33, online24: 11, offline25: 25, online25: 4 },
+            { id: 100, department: "质量管理部", name: "张大伟", offline24: 28, online24: 11, offline25: 20, online25: 4 },
+            { id: 101, department: "质量管理部", name: "闫雅贤", offline24: 26, online24: 3, offline25: 17, online25: 8 },
+            { id: 102, department: "质量管理部", name: "瞿垒", offline24: 0, online24: 0, offline25: 12, online25: 28 },
+            { id: 103, department: "质量管理部", name: "孙冬婷", offline24: 8, online24: 11, offline25: 12, online25: 3 },
+            { id: 104, department: "质量管理部", name: "张文锦", offline24: 2, online24: 0, offline25: 23, online25: 0 },
+            { id: 105, department: "质量管理部", name: "霍东晓", offline24: 0, online24: 0, offline25: 14, online25: 2 },
+            { id: 106, department: "质量管理部", name: "张冉", offline24: 6, online24: 0, offline25: 3, online25: 3 }
+        ];
+
+        // DOM元素
+        const searchInput = document.getElementById('search-input');
+        const searchButton = document.getElementById('search-button');
+        const suggestions = document.getElementById('suggestions');
+        const resultSection = document.getElementById('result-section');
+        const employeeResult = document.getElementById('employee-result');
+
+        // 搜索功能
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.trim();
+            suggestions.innerHTML = '';
+            
+            if (searchTerm.length === 0) {
+                suggestions.style.display = 'none';
+                return;
+            }
+            
+            const matchedEmployees = employees.filter(emp => 
+                emp.name.includes(searchTerm)
+            );
+            
+            if (matchedEmployees.length > 0) {
+                matchedEmployees.slice(0, 10).forEach(emp => {
+                    const item = document.createElement('div');
+                    item.className = 'suggestion-item';
+                    item.innerHTML = `
+                        <div>${emp.name}</div>
+                        <div class="suggestion-department">${emp.department}</div>
+                    `;
+                    item.addEventListener('click', () => {
+                        searchInput.value = emp.name;
+                        suggestions.style.display = 'none';
+                        searchEmployee(emp.name);
+                    });
+                    suggestions.appendChild(item);
+                });
+                suggestions.style.display = 'block';
+            } else {
+                suggestions.style.display = 'none';
+            }
+        });
+        
+        // 搜索按钮点击事件
+        searchButton.addEventListener('click', () => {
+            const name = searchInput.value.trim();
+            if (name) {
+                searchEmployee(name);
+            }
+        });
+        
+        // 按Enter键搜索
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const name = searchInput.value.trim();
+                if (name) {
+                    searchEmployee(name);
+                }
+            }
+        });
+        
+        // 搜索员工
+        function searchEmployee(name) {
+            const employee = employees.find(emp => emp.name === name);
+            
+            if (employee) {
+                displayEmployee(employee);
+                resultSection.style.display = 'block';
+                
+                // 滚动到结果区域
+                resultSection.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                employeeResult.innerHTML = `
+                    <div class="no-result">
+                        <i class="fas fa-user-slash"></i>
+                        <h2>未找到员工信息</h2>
+                        <p>未找到姓名为 "${name}" 的员工，请检查输入是否正确。</p>
+                    </div>
+                `;
+                resultSection.style.display = 'block';
+            }
+        }
+        
+        // 显示员工信息
+        function displayEmployee(employee) {
+            // 计算总分
+            const total = employee.offline24 + employee.online24 + employee.offline25 + employee.online25;
+            
+            // 部门平均分
+            const deptEmployees = employees.filter(emp => emp.department === employee.department);
+            const deptTotal = deptEmployees.reduce((sum, emp) => 
+                sum + emp.offline24 + emp.online24 + emp.offline25 + emp.online25, 0);
+            const deptAverage = Math.round(deptTotal / deptEmployees.length);
+            
+            // 公司排名
+            const allTotals = employees.map(emp => 
+                emp.offline24 + emp.online24 + emp.offline25 + emp.online25
+            ).sort((a, b) => b - a);
+            const rank = allTotals.indexOf(total) + 1;
+            
+            // 达标状态（调整为30分）
+            const compliance = total >= 30 ? "已达标" : "未达标";
+            
+            // 更新统计信息
+            document.getElementById('dept-average').textContent = deptAverage;
+            document.getElementById('company-rank').textContent = `#${rank}`;
+            document.getElementById('compliance-status').textContent = compliance;
+            document.getElementById('compliance-status').style.color = compliance === "已达标" ? "var(--success)" : "var(--primary)";
+            
+            // 生成员工卡片
+            employeeResult.innerHTML = `
+                <div class="employee-header">
+                    <div class="employee-name">${employee.name}</div>
+                    <div class="employee-department">${employee.department}</div>
+                </div>
+                
+                <div class="credit-summary">
+                    <div class="credit-card">
+                        <h3>2024年线下学分</h3>
+                        <div class="credit-value">${employee.offline24}</div>
+                    </div>
+                    <div class="credit-card">
+                        <h3>2024年线上学分</h3>
+                        <div class="credit-value">${employee.online24}</div>
+                    </div>
+                    <div class="credit-card">
+                        <h3>2025年线下学分</h3>
+                        <div class="credit-value">${employee.offline25}</div>
+                    </div>
+                    <div class="credit-card">
+                        <h3>2025年线上学分</h3>
+                        <div class="credit-value">${employee.online25}</div>
+                    </div>
+                    <div class="credit-card" style="background: linear-gradient(135deg, #fff9c4, #ffecb3);">
+                        <h3>总学分</h3>
+                        <div class="credit-value">${total}</div>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-title">学分分布</div>
+                    <div class="chart" id="credit-chart">
+                        <div class="bar-container">
+                            <div class="bar" style="height: ${Math.max(5, employee.offline24/2)}px; background-color: #4361ee;">
+                                <div class="bar-value">${employee.offline24}</div>
+                            </div>
+                            <div class="bar-label">2024线下</div>
+                        </div>
+                        <div class="bar-container">
+                            <div class="bar" style="height: ${Math.max(5, employee.online24/2)}px; background-color: #3a86ff;">
+                                <div class="bar-value">${employee.online24}</div>
+                            </div>
+                            <div class="bar-label">2024线上</div>
+                        </div>
+                        <div class="bar-container">
+                            <div class="bar" style="height: ${Math.max(5, employee.offline25/2)}px; background-color: #4895ef;">
+                                <div class="bar-value">${employee.offline25}</div>
+                            </div>
+                            <div class="bar-label">2025线下</div>
+                        </div>
+                        <div class="bar-container">
+                            <div class="bar" style="height: ${Math.max(5, employee.online25/2)}px; background-color: #4cc9f0;">
+                                <div class="bar-value">${employee.online25}</div>
+                            </div>
+                            <div class="bar-label">2025线上</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
