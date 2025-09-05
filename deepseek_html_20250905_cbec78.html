@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>铁人消防员工培训学分查询平台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 25px;
+            overflow: hidden;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        h1 {
+            color: #1a2980;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .description {
+            color: #666;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        
+        .search-section {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        
+        #search-input {
+            padding: 12px 20px;
+            width: 100%;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        #search-input:focus {
+            border-color: #1a2980;
+            outline: none;
+        }
+        
+        #search-btn {
+            position: absolute;
+            right: 5px;
+            top: 5px;
+            padding: 7px 15px;
+            background: #1a2980;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        
+        #search-btn:hover {
+            background: #26d0ce;
+        }
+        
+        .result-section {
+            display: none;
+            margin-top: 20px;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .employee-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+        
+        .employee-name {
+            font-size: 24px;
+            color: #1a2980;
+            margin-bottom: 10px;
+        }
+        
+        .employee-department {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .credit-total {
+            font-size: 42px;
+            font-weight: bold;
+            color: #1a2980;
+            margin: 15px 0;
+        }
+        
+        .credit-label {
+            font-size: 16px;
+            color: #666;
+        }
+        
+        .status-section {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: bold;
+        }
+        
+        .status-achieved {
+            background: #e7f6e9;
+            color: #2e7d32;
+        }
+        
+        .status-not-achieved {
+            background: #ffebee;
+            color: #c62828;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 30px;
+            color: #666;
+            font-size: 18px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #888;
+            font-size: 14px;
+            padding-top: 20px;
+            border-top: 1px solid #eaeaea;
+        }
+        
+        .credit-standard {
+            text-align: center;
+            margin: 15px 0;
+            font-size: 14px;
+            color: #1a2980;
+            font-weight: bold;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .credit-total {
+                font-size: 36px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>铁人消防员工培训学分查询平台</h1>
+            <p class="description">请输入员工姓名查询培训总学分</p>
+            <div class="credit-standard">年度学分达标要求：30分</div>
+        </header>
+        
+        <div class="search-section">
+            <input type="text" id="search-input" placeholder="请输入员工姓名">
+            <button id="search-btn">查询</button>
+        </div>
+        
+        <div class="result-section" id="result-section">
+            <!-- 结果将由JavaScript动态生成 -->
+        </div>
+        
+        <footer>
+            <p>© 2025 铁人消防 - 员工培训学分管理系统</p>
+        </footer>
+    </div>
+
+    <script>
+        // 完整员工数据（只包含总学分）
+        const employeeData = [
+            { department: "外贸部", name: "葛兰萍", total: 4 },
+            { department: "外贸部", name: "倪妮", total: 4 },
+            { department: "外贸部", name: "张晶晶", total: 4 },
+            { department: "EPC工程技术部", name: "张剑超", total: 62 },
+            { department: "EPC工程技术部", name: "张治政", total: 67 },
+            { department: "EPC工程技术部", name: "孙泰宇", total: 83 },
+            { department: "EPC工程技术部", name: "庄丽萍", total: 24 },
+            { department: "EPC工程技术部", name: "郁维康", total: 60 },
+            { department: "EPC工程技术部", name: "韦润施", total: 113 },
+            { department: "EPC工程技术部", name: "夏家政", total: 25 },
+            { department: "EPC工程技术部", name: "高晗", total: 38 },
+            { department: "储能技术部", name: "崔思佳", total: 87 },
+            { department: "储能技术部", name: "丁皓辰", total: 114 },
+            { department: "储能技术部", name: "陆敬频", total: 72 },
+            { department: "储能技术部", name: "刘时财", total: 81 },
+            { department: "储能技术部", name: "寇琪", total: 176 },
+            { department: "储能技术部", name: "郭明宇", total: 149 },
+            { department: "储能技术部", name: "赵文琪", total: 167 },
+            { department: "储能技术部", name: "户世瑶", total: 145 },
+            { department: "储能技术部", name: "韩彦慧", total: 143 },
+            { department: "储能技术部", name: "刘利欣", total: 155 },
+            { department: "储能技术部", name: "徐光晶", total: 80 },
+            { department: "储能技术部", name: "孙毅凯", total: 73 },
+            { department: "储能技术部", name: "龚一雕", total: 109 },
+            { department: "储能技术部", name: "马杰", total: 48 },
+            { department: "储能技术部", name: "韩保润", total: 82 },
+            { department: "储能技术部", name: "汪梦月", total: 75 },
+            { department: "储能技术部", name: "张艳忠", total: 39 },
+            { department: "储能技术部", name: "郭帅成", total: 13 },
+            { department: "储能技术部", name: "李宁", total: 29 },
+            { department: "储能技术部", name: "汤建华", total: 8 },
+            { department: "储能技术部", name: "李洁1", total: 92 },
+            { department: "储能技术部", name: "李龙飞", total: 5 },
+            { department: "储能技术部", name: "力炎斌", total: 45 },
+            { department: "储能技术部", name: "吴培诚", total: 30 },
+            { department: "工艺组", name: "张亚伟", total: 24 },
+            { department: "工艺组", name: "惠志鑫", total: 16 },
+            { department: "验证调试组", name: "彭邦理", total: 44 },
+            { department: "验证调试组", name: "张俊杰", total: 5 },
+            { department: "验证调试组", name: "邱豪", total: 37 },
+            { department: "验证调试组", name: "孙昊", total: 6 },
+            { department: "验证调试组", name: "熊浩", total: 0 },
+            { department: "客服部", name: "何霜霜", total: 25 },
+            { department: "客服部", name: "陈瑶", total: 23 },
+            { department: "供应链", name: "计敏芝", total: 63 },
+            { department: "供应链", name: "田丽", total: 74 },
+            { department: "供应链", name: "瞿蓓珍", total: 34 },
+            { department: "供应链", name: "付卫允", total: 66 },
+            { department: "供应链", name: "唐德清", total: 47 },
+            { department: "供应链", name: "潘涛", total: 6 },
+            { department: "供应链", name: "曹娟", total: 0 },
+            { department: "供应链", name: "张本韦", total: 15 },
+            { department: "供应链", name: "马俊", total: 6 },
+            { department: "供应链", name: "陆家文", total: 4 },
+            { department: "供应链", name: "张笑语", total: 5 },
+            { department: "生产部", name: "卢正魁", total: 21 },
+            { department: "生产部", name: "王黎华", total: 10 },
+            { department: "生产部", name: "张翀", total: 6 },
+            { department: "研发部", name: "戴顺杰", total: 20 },
+            { department: "研发部", name: "贺攀登", total: 48 },
+            { department: "研发部", name: "喻婷", total: 48 },
+            { department: "研发部", name: "吴晓毅", total: 43 },
+            { department: "研发部", name: "孙丝", total: 48 },
+            { department: "研发部", name: "赵顺祥", total: 4 },
+            { department: "研发部", name: "肖煜", total: 6 },
+            { department: "研发部", name: "陈扬", total: 4 },
+            { department: "研发部", name: "芦文轩", total: 3 },
+            { department: "营销部", name: "端木文正", total: 26 },
+            { department: "项目部", name: "张卫超", total: 27 },
+            { department: "营销部", name: "王美红", total: 14 },
+            { department: "营销部", name: "翁叶敏", total: 21 },
+            { department: "营销部", name: "付霄剑", total: 16 },
+            { department: "营销部", name: "彭洪超", total: 5 },
+            { department: "营销部", name: "李笑菲", total: 0 },
+            { department: "营销部", name: "王俊", total: 4 },
+            { department: "营销部", name: "李洁2", total: 3 },
+            { department: "营销部", name: "赖可欣", total: 0 },
+            { department: "项目部", name: "叶献春", total: 24 },
+            { department: "项目部", name: "邹楠", total: 6 },
+            { department: "项目部", name: "王红石", total: 4 },
+            { department: "项目部", name: "刘先龙", total: 0 },
+            { department: "质量管理部", name: "郭锐", total: 0 },
+            { department: "质量管理部", name: "闫雅贤", total: 74 },
+            { department: "质量管理部", name: "曹辉", total: 8 },
+            { department: "质量管理部", name: "潘腾", total: 103 },
+            { department: "质量管理部", name: "张冉", total: 12 },
+            { department: "质量管理部", name: "张大伟", total: 72 },
+            { department: "质量管理部", name: "陈志宇", total: 120 },
+            { department: "质量管理部", name: "孙冬婷", total: 54 },
+            { department: "质量管理部", name: "徐宇轩", total: 119 },
+            { department: "质量管理部", name: "霍东晓", total: 25 },
+            { department: "质量管理部", name: "瞿垒", total: 54 },
+            { department: "质量管理部", name: "刘强", total: 2 },
+            { department: "质量管理部", name: "刘焕琦", total: 10 },
+            { department: "行政人事部", name: "陈铃琳", total: 27 },
+            { department: "行政人事部", name: "胡耀云", total: 16 },
+            { department: "行政人事部", name: "张娟", total: 16 },
+            { department: "行政人事部", name: "李圣乐", total: 154 },
+            { department: "行政人事部", name: "于俊杰", total: 7 },
+            { department: "财务部", name: "李超文", total: 12 },
+            { department: "财务部", name: "乔春华", total: 6 },
+            { department: "财务部", name: "舒君蓉", total: 6 },
+            { department: "财务部", name: "王佳伟", total: 6 },
+            { department: "财务部", name: "胡付贝妮", total: 4 },
+            { department: "新媒体部", name: "陈文豪", total: 4 },
+            { department: "现场项目部", name: "赵健", total: 3 },
+            { department: "现场项目部", name: "黄义松", total: 3 },
+            { department: "现场项目部", name: "姚成林", total: 5 },
+            { department: "现场项目部", name: "赵波", total: 3 },
+            { department: "现场项目部", name: "徐秋锋", total: 3 },
+            { department: "现场项目部", name: "王云", total: 3 },
+            { department: "现场项目部", name: "易卫", total: 3 },
+            { department: "现场项目部", name: "帅笑警", total: 3 },
+            { department: "现场项目部", name: "张红强", total: 22 }
+        ];
+
+        document.getElementById('search-btn').addEventListener('click', searchEmployee);
+        document.getElementById('search-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                searchEmployee();
+            }
+        });
+
+        function searchEmployee() {
+            const searchValue = document.getElementById('search-input').value.trim();
+            const resultSection = document.getElementById('result-section');
+            
+            if (!searchValue) {
+                resultSection.innerHTML = '<div class="no-results">请输入员工姓名</div>';
+                resultSection.style.display = 'block';
+                return;
+            }
+            
+            // 搜索匹配的员工（支持模糊搜索）
+            const results = employeeData.filter(employee => 
+                employee.name.includes(searchValue)
+            );
+            
+            if (results.length === 0) {
+                resultSection.innerHTML = '<div class="no-results">未找到匹配的员工记录</div>';
+                resultSection.style.display = 'block';
+                return;
+            }
+            
+            // 显示搜索结果
+            resultSection.innerHTML = '';
+            results.forEach(employee => {
+                const employeeCard = document.createElement('div');
+                employeeCard.className = 'employee-info';
+                
+                // 判断是否达标
+                const isAchieved = employee.total >= 30;
+                
+                employeeCard.innerHTML = `
+                    <div class="employee-name">${employee.name}</div>
+                    <div class="employee-department">${employee.department}</div>
+                    <div class="credit-label">总学分</div>
+                    <div class="credit-total">${employee.total}</div>
+                    <div class="status-section ${isAchieved ? 'status-achieved' : 'status-not-achieved'}">
+                        ${isAchieved ? '已达成年学分标准' : '未达成年学分标准'}
+                    </div>
+                `;
+                
+                resultSection.appendChild(employeeCard);
+            });
+            
+            resultSection.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
